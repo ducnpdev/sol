@@ -1,16 +1,13 @@
 const hre = require("hardhat");
 
 async function main() {
-  // Get the deployed contract address (you can replace this with the actual address from deployment)
-  const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-  
-  // Get the contract factory
+  // Deploy the contract first on the built-in network
+  console.log("Deploying Counter contract...");
   const Counter = await hre.ethers.getContractFactory("Counter");
+  const counter = await Counter.deploy();
+  await counter.waitForDeployment();
   
-  // Attach to the deployed contract
-  const counter = Counter.attach(contractAddress);
-  
-  console.log("Interacting with Counter contract at:", contractAddress);
+  console.log("Counter deployed to:", await counter.getAddress());
   
   // Get initial count
   let count = await counter.getCount();
