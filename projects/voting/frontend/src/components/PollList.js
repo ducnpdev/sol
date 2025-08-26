@@ -26,9 +26,10 @@ const PollList = ({ contract, account, isOwner }) => {
 
       // Get all polls (we'll need to iterate through pollCount)
       const pollCount = await contract.pollCount();
+      const pollCountNumber = pollCount._isBigNumber ? pollCount.toNumber() : pollCount;
       const allPolls = [];
 
-      for (let i = 1; i <= pollCount; i++) {
+      for (let i = 1; i <= pollCountNumber; i++) {
         try {
           const pollInfo = await contract.getPollInfo(i);
           allPolls.push(pollInfo);
@@ -38,7 +39,11 @@ const PollList = ({ contract, account, isOwner }) => {
       }
 
       // Sort polls by creation time (newest first)
-      allPolls.sort((a, b) => b.id - a.id);
+      allPolls.sort((a, b) => {
+        const idA = a.id._isBigNumber ? a.id.toNumber() : a.id;
+        const idB = b.id._isBigNumber ? b.id.toNumber() : b.id;
+        return idB - idA;
+      });
       setPolls(allPolls);
     } catch (error) {
       console.error('Error loading polls:', error);
@@ -80,23 +85,27 @@ const PollList = ({ contract, account, isOwner }) => {
 
   const getActivePolls = () => {
     const now = Math.floor(Date.now() / 1000);
-    return polls.filter(poll => 
-      poll.isActive && 
-      poll.startTime <= now && 
-      poll.endTime >= now
-    );
+    return polls.filter(poll => {
+      const startTime = poll.startTime._isBigNumber ? poll.startTime.toNumber() : poll.startTime;
+      const endTime = poll.endTime._isBigNumber ? poll.endTime.toNumber() : poll.endTime;
+      return poll.isActive && startTime <= now && endTime >= now;
+    });
   };
 
   const getUpcomingPolls = () => {
     const now = Math.floor(Date.now() / 1000);
-    return polls.filter(poll => poll.startTime > now);
+    return polls.filter(poll => {
+      const startTime = poll.startTime._isBigNumber ? poll.startTime.toNumber() : poll.startTime;
+      return startTime > now;
+    });
   };
 
   const getEndedPolls = () => {
     const now = Math.floor(Date.now() / 1000);
-    return polls.filter(poll => 
-      !poll.isActive || poll.endTime < now
-    );
+    return polls.filter(poll => {
+      const endTime = poll.endTime._isBigNumber ? poll.endTime.toNumber() : poll.endTime;
+      return !poll.isActive || endTime < now;
+    });
   };
 
   if (loading) {
@@ -154,7 +163,7 @@ const PollList = ({ contract, account, isOwner }) => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {activePolls.map((poll) => (
               <PollCard
-                key={poll.id}
+                key={poll.id._isBigNumber ? poll.id.toNumber() : poll.id}
                 poll={poll}
                 onVote={handleVote}
                 onEndPoll={isOwner ? handleEndPoll : null}
@@ -174,7 +183,7 @@ const PollList = ({ contract, account, isOwner }) => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {upcomingPolls.map((poll) => (
               <PollCard
-                key={poll.id}
+                key={poll.id._isBigNumber ? poll.id.toNumber() : poll.id}
                 poll={poll}
                 onVote={handleVote}
                 onEndPoll={isOwner ? handleEndPoll : null}
@@ -194,7 +203,7 @@ const PollList = ({ contract, account, isOwner }) => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {endedPolls.map((poll) => (
               <PollCard
-                key={poll.id}
+                key={poll.id._isBigNumber ? poll.id.toNumber() : poll.id}
                 poll={poll}
                 onVote={handleVote}
                 onEndPoll={isOwner ? handleEndPoll : null}

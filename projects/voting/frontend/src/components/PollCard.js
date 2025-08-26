@@ -6,25 +6,28 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
   const [loading, setLoading] = useState(false);
 
   const now = Math.floor(Date.now() / 1000);
-  const isActive = poll.isActive && poll.startTime <= now && poll.endTime >= now;
-  const isUpcoming = poll.startTime > now;
-  const isEnded = !poll.isActive || poll.endTime < now;
+  const startTime = poll.startTime._isBigNumber ? poll.startTime.toNumber() : poll.startTime;
+  const endTime = poll.endTime._isBigNumber ? poll.endTime.toNumber() : poll.endTime;
+  const isActive = poll.isActive && startTime <= now && endTime >= now;
+  const isUpcoming = startTime > now;
+  const isEnded = !poll.isActive || endTime < now;
 
   useEffect(() => {
     if (contract && account) {
       checkVotingStatus();
     }
-  }, [contract, account, poll.id]);
+  }, [contract, account, poll.id._isBigNumber ? poll.id.toNumber() : poll.id]);
 
   useEffect(() => {
     if (isEnded && contract) {
       getWinningOption();
     }
-  }, [isEnded, contract, poll.id]);
+  }, [isEnded, contract, poll.id._isBigNumber ? poll.id.toNumber() : poll.id]);
 
   const checkVotingStatus = async () => {
     try {
-      const voted = await contract.hasVoted(poll.id, account);
+      const pollId = poll.id._isBigNumber ? poll.id.toNumber() : poll.id;
+      const voted = await contract.hasVoted(pollId, account);
       setHasVoted(voted);
     } catch (error) {
       console.error('Error checking voting status:', error);
@@ -33,8 +36,10 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
 
   const getWinningOption = async () => {
     try {
-      const winning = await contract.getWinningOption(poll.id);
-      setWinningOption(winning);
+      const pollId = poll.id._isBigNumber ? poll.id.toNumber() : poll.id;
+      const winning = await contract.getWinningOption(pollId);
+      const winningNumber = winning._isBigNumber ? winning.toNumber() : winning;
+      setWinningOption(winningNumber);
     } catch (error) {
       console.error('Error getting winning option:', error);
     }
@@ -45,7 +50,8 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
     
     setLoading(true);
     try {
-      await onVote(poll.id, optionId);
+      const pollId = poll.id._isBigNumber ? poll.id.toNumber() : poll.id;
+      await onVote(pollId, optionId);
       setHasVoted(true);
     } catch (error) {
       console.error('Error voting:', error);
@@ -59,7 +65,8 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
     
     setLoading(true);
     try {
-      await onEndPoll(poll.id);
+      const pollId = poll.id._isBigNumber ? poll.id.toNumber() : poll.id;
+      await onEndPoll(pollId);
     } catch (error) {
       console.error('Error ending poll:', error);
     } finally {
@@ -94,7 +101,10 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
   };
 
   const getTotalVotes = () => {
-    return poll.voteCounts.reduce((sum, count) => sum + count, 0);
+    return poll.voteCounts.reduce((sum, count) => {
+      const voteCount = count._isBigNumber ? count.toNumber() : count;
+      return sum + voteCount;
+    }, 0);
   };
 
   const getPercentage = (votes) => {
@@ -117,8 +127,8 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
         </p>
 
         <div className="text-xs text-gray-500 mb-4">
-          <div>Start: {formatTime(poll.startTime)}</div>
-          <div>End: {formatTime(poll.endTime)}</div>
+          <div>Start: {formatTime(startTime)}</div>
+          <div>End: {formatTime(endTime)}</div>
           <div>Total Votes: {getTotalVotes()}</div>
         </div>
 
@@ -126,7 +136,8 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
         <div className="space-y-3 mb-4">
           {poll.options.map((option, index) => {
             const voteCount = poll.voteCounts[index];
-            const percentage = getPercentage(voteCount);
+            const voteCountNumber = voteCount._isBigNumber ? voteCount.toNumber() : voteCount;
+            const percentage = getPercentage(voteCountNumber);
             const isWinning = winningOption !== null && winningOption === index;
             
             return (
@@ -152,7 +163,7 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
                     </span>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {voteCount} votes ({percentage}%)
+                    {voteCountNumber} votes ({percentage}%)
                   </div>
                 </div>
                 
@@ -195,7 +206,7 @@ const PollCard = ({ poll, onVote, onEndPoll, account, contract, isOwner }) => {
               Winning Option: {poll.options[winningOption]}
             </div>
             <div className="text-sm text-gray-500">
-              with {poll.voteCounts[winningOption]} votes
+              with {poll.voteCounts[winningOption]._isBigNumber ? poll.voteCounts[winningOption].toNumber() : poll.voteCounts[winningOption]} votes
             </div>
           </div>
         )}

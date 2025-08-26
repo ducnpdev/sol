@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  console.log("=== Creating Active Polls (Starting Now) ===\n");
+  console.log("=== Creating Polls with Time Advance ===\n");
 
   try {
     const [owner] = await ethers.getSigners();
@@ -18,9 +18,20 @@ async function main() {
     const currentTime = currentBlock.timestamp;
     console.log("Current time:", new Date(currentTime * 1000).toLocaleString());
     
-    // Create first poll - starts in 10 seconds
-    console.log("\n1. Creating 'Favorite Programming Language' poll (starts in 10 seconds)...");
-    const startTime1 = currentTime + 10; // Start in 10 seconds
+    // Mine a few blocks to advance time
+    console.log("\n⏰ Advancing time by mining blocks...");
+    for (let i = 0; i < 3; i++) {
+      await ethers.provider.send("evm_mine", []);
+    }
+    
+    // Get updated timestamp
+    const updatedBlock = await ethers.provider.getBlock("latest");
+    const updatedTime = updatedBlock.timestamp;
+    console.log("Updated time:", new Date(updatedTime * 1000).toLocaleString());
+    
+    // Create polls with future start times
+    console.log("\n1. Creating 'Favorite Programming Language' poll...");
+    const startTime1 = updatedTime + 60; // Start in 1 minute
     const endTime1 = startTime1 + 3600; // End in 1 hour
     
     const tx1 = await votingContract.createPoll(
@@ -33,9 +44,9 @@ async function main() {
     await tx1.wait();
     console.log("✅ First poll created!");
     
-    // Create second poll - starts in 10 seconds
-    console.log("\n2. Creating 'Best Blockchain Platform' poll (starts in 10 seconds)...");
-    const startTime2 = currentTime + 10; // Start in 10 seconds
+    // Create second poll
+    console.log("\n2. Creating 'Best Blockchain Platform' poll...");
+    const startTime2 = updatedTime + 120; // Start in 2 minutes
     const endTime2 = startTime2 + 7200; // End in 2 hours
     
     const tx2 = await votingContract.createPoll(
@@ -48,9 +59,9 @@ async function main() {
     await tx2.wait();
     console.log("✅ Second poll created!");
     
-    // Create third poll - starts in 10 seconds
-    console.log("\n3. Creating 'DeFi Protocol Preference' poll (starts in 10 seconds)...");
-    const startTime3 = currentTime + 10; // Start in 10 seconds
+    // Create third poll
+    console.log("\n3. Creating 'DeFi Protocol Preference' poll...");
+    const startTime3 = updatedTime + 180; // Start in 3 minutes
     const endTime3 = startTime3 + 5400; // End in 1.5 hours
     
     const tx3 = await votingContract.createPoll(
@@ -63,16 +74,14 @@ async function main() {
     await tx3.wait();
     console.log("✅ Third poll created!");
     
-    // Mine a few blocks to advance time
-    console.log("\n4. Advancing time to ensure polls are active...");
+    // Mine more blocks to make polls active
+    console.log("\n⏰ Advancing time to make polls active...");
     for (let i = 0; i < 5; i++) {
       await ethers.provider.send("evm_mine", []);
     }
     
-    console.log("\n🎉 Successfully created 3 active polls!");
-    console.log("All polls start immediately and are ready for voting.");
-    
-    console.log("\n📝 Now you can:");
+    console.log("\n🎉 Successfully created 3 polls!");
+    console.log("📝 Now you can:");
     console.log("1. Go to http://localhost:3000");
     console.log("2. Refresh the page (F5 or Cmd+R)");
     console.log("3. You should see 3 active polls ready for voting!");
