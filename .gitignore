@@ -226,3 +226,5 @@ coverage.json
 
 # Local hardhat files
 hardhat-deployments/
+
+deployed-addresses.json
