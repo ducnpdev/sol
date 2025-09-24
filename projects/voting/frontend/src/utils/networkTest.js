@@ -1,4 +1,4 @@
-// Test MetaMask network connection
+// Test MetaMask network connection to Sepolia
 export const testMetaMaskConnection = async () => {
   if (!window.ethereum) {
     return {
@@ -13,19 +13,20 @@ export const testMetaMaskConnection = async () => {
     
     // Get current network
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    
-    // Check if connected to Hardhat Local (Chain ID: 0x539 = 1337 in hex)
-    if (chainId === '0x539') {
+
+    // Check if connected to Sepolia (Chain ID: 0xaa36a7 = 11155111 in hex)
+    const SEPOLIA_CHAIN_ID_HEX = '0xaa36a7';
+    if (chainId === SEPOLIA_CHAIN_ID_HEX) {
       return {
         success: true,
         account: accounts[0],
         chainId: chainId,
-        network: "Hardhat Local"
+        network: "Sepolia"
       };
     } else {
       return {
         success: false,
-        error: `Wrong network. Expected: 0x539 (Hardhat Local), Got: ${chainId}`,
+        error: `Wrong network. Expected: ${SEPOLIA_CHAIN_ID_HEX} (Sepolia), Got: ${chainId}`,
         currentChainId: chainId,
         account: accounts[0]
       };
@@ -38,8 +39,8 @@ export const testMetaMaskConnection = async () => {
   }
 };
 
-// Switch to Hardhat Local network
-export const switchToHardhatNetwork = async () => {
+// Switch to Sepolia network
+export const switchToSepolia = async () => {
   if (!window.ethereum) {
     throw new Error("MetaMask not installed");
   }
@@ -47,7 +48,7 @@ export const switchToHardhatNetwork = async () => {
   try {
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x539' }], // 1337 in hex
+      params: [{ chainId: '0xaa36a7' }], // 11155111 in hex
     });
     return { success: true };
   } catch (switchError) {
@@ -57,14 +58,15 @@ export const switchToHardhatNetwork = async () => {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [{
-            chainId: '0x539',
-            chainName: 'Hardhat Local',
+            chainId: '0xaa36a7',
+            chainName: 'Sepolia',
             nativeCurrency: {
-              name: 'ETH',
+              name: 'SepoliaETH',
               symbol: 'ETH',
               decimals: 18
             },
-            rpcUrls: ['http://127.0.0.1:8545'],
+            rpcUrls: [process.env.REACT_APP_RPC_URL || 'https://rpc.sepolia.org'],
+            blockExplorerUrls: ['https://sepolia.etherscan.io']
           }],
         });
         return { success: true };

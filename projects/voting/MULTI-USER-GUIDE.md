@@ -3,7 +3,21 @@
 ## Tổng quan
 Hệ thống voting này hỗ trợ nhiều user có thể bỏ phiếu trên cùng một poll. Mỗi user chỉ được bỏ phiếu một lần per poll.
 
-## Các Script có sẵn
+## 🚀 **Bước 1: Deploy Contracts**
+
+### **Deploy Complete System**
+```bash
+# Deploy cả VotingToken và VotingContract
+npx hardhat run scripts/deploy-all.js --network localhost
+```
+
+### **Cập nhật Addresses**
+```bash
+# Tự động cập nhật tất cả script với address mới
+npx hardhat run scripts/update-addresses.js --network localhost
+```
+
+## 📋 **Các Script có sẵn**
 
 ### 1. **setup-multi-user-accounts.js**
 - **Mục đích**: Thiết lập nhiều tài khoản test với token
@@ -13,10 +27,20 @@ Hệ thống voting này hỗ trợ nhiều user có thể bỏ phiếu trên c�
   - Hiển thị private key để import vào MetaMask
 - **Sử dụng**: `npx hardhat run scripts/setup-multi-user-accounts.js --network localhost`
 
-### 2. **quick-multi-user-test.js**
+### 2. **simple-multi-user-test.js** ⭐ **RECOMMENDED**
+- **Mục đích**: Tạo poll và test multi-user voting ngay lập tức
+- **Chức năng**:
+  - Tạo poll mới bắt đầu ngay lập tức
+  - Test voting với 3 user khác nhau
+  - Hiển thị kết quả real-time
+  - Không cần poll có sẵn
+- **Sử dụng**: `npx hardhat run scripts/simple-multi-user-test.js --network localhost`
+
+### 3. **quick-multi-user-test.js**
 - **Mục đích**: Test nhanh voting với nhiều user trên poll hiện có
 - **Chức năng**:
   - Tìm poll đang hoạt động
+  - Tự động tạo poll nếu không có
   - Test voting với 3 user khác nhau
   - Hiển thị kết quả real-time
 - **Sử dụng**: `npx hardhat run scripts/quick-multi-user-test.js --network localhost`
@@ -45,24 +69,29 @@ Hệ thống voting này hỗ trợ nhiều user có thể bỏ phiếu trên c�
   - Không cần đợi
 - **Sử dụng**: `npx hardhat run scripts/create-poll-and-vote-multi.js --network localhost`
 
-## Cách sử dụng
+## 🛠️ **Cách sử dụng đầy đủ**
 
-### Bước 1: Khởi động Hardhat Network
+### **Bước 1: Khởi động Hardhat Network**
 ```bash
 npx hardhat node
 ```
 
-### Bước 2: Deploy contracts (nếu chưa có)
+### **Bước 2: Deploy contracts (QUAN TRỌNG!)**
 ```bash
-npx hardhat run scripts/deploy.js --network localhost
+npx hardhat run scripts/deploy-all.js --network localhost
 ```
 
-### Bước 3: Thiết lập multi-user accounts
+### **Bước 3: Cập nhật addresses trong scripts**
+```bash
+npx hardhat run scripts/update-addresses.js --network localhost
+```
+
+### **Bước 4: Thiết lập multi-user accounts**
 ```bash
 npx hardhat run scripts/setup-multi-user-accounts.js --network localhost
 ```
 
-### Bước 4: Test multi-user voting
+### **Bước 5: Test multi-user voting**
 ```bash
 # Test nhanh với poll hiện có
 npx hardhat run scripts/quick-multi-user-test.js --network localhost
@@ -71,7 +100,45 @@ npx hardhat run scripts/quick-multi-user-test.js --network localhost
 npx hardhat run scripts/create-poll-and-vote-multi.js --network localhost
 ```
 
-## Cách hoạt động
+## 🔧 **Troubleshooting**
+
+### **Lỗi "Cannot read properties of undefined (reading 'formatEther')"**
+- **Nguyên nhân**: Sử dụng `ethers.utils.formatEther()` cũ trong phiên bản ethers mới
+- **Giải pháp**: Đã được sửa tự động, sử dụng `ethers.formatEther()` thay thế
+- **Kiểm tra**: Chạy `npx hardhat run scripts/test-connection-simple.js --network localhost`
+
+### **Lỗi "could not decode result data"**
+- **Nguyên nhân**: Contract chưa được deploy hoặc address sai
+- **Giải pháp**: 
+  1. Chạy `deploy-all.js` trước
+  2. Sau đó chạy `update-addresses.js`
+  3. Kiểm tra file `deployed-addresses.json`
+
+### **Lỗi "Poll is not active"**
+- Kiểm tra thời gian bắt đầu/kết thúc của poll
+- Sử dụng script `advance-time.js` để tăng thời gian
+
+### **Lỗi "Already voted"**
+- User đã bỏ phiếu trong poll này
+- Sử dụng tài khoản khác để test
+
+### **Lỗi "Poll does not exist"**
+- Kiểm tra poll ID có đúng không
+- Sử dụng script `check-polls.js` để xem danh sách poll
+
+## 📁 **File Output**
+
+Sau khi chạy `deploy-all.js`, bạn sẽ có file `deployed-addresses.json`:
+
+```json
+{
+  "token": "0x...",
+  "contract": "0x...",
+  "owner": "0x..."
+}
+```
+
+## 🔑 **Cách hoạt động**
 
 ### 1. **Multiple Signers**
 - Hardhat tự động tạo nhiều tài khoản test
@@ -88,7 +155,7 @@ npx hardhat run scripts/create-poll-and-vote-multi.js --network localhost
 - Kiểm tra poll có đang hoạt động không
 - Kiểm tra thời gian bắt đầu/kết thúc
 
-## Test với Frontend
+## 📱 **Test với Frontend**
 
 ### 1. **Import Accounts vào MetaMask**
 - Copy private key từ script `setup-multi-user-accounts.js`
@@ -103,48 +170,24 @@ npx hardhat run scripts/create-poll-and-vote-multi.js --network localhost
 - Frontend sẽ hiển thị kết quả voting real-time
 - Mỗi lần bỏ phiếu sẽ cập nhật UI
 
-## Troubleshooting
-
-### Lỗi "Poll is not active"
-- Kiểm tra thời gian bắt đầu/kết thúc của poll
-- Sử dụng script `advance-time.js` để tăng thời gian
-
-### Lỗi "Already voted"
-- User đã bỏ phiếu trong poll này
-- Sử dụng tài khoản khác để test
-
-### Lỗi "Poll does not exist"
-- Kiểm tra poll ID có đúng không
-- Sử dụng script `check-polls.js` để xem danh sách poll
-
-## Ví dụ Output
+## 📊 **Ví dụ Output**
 
 ```
-=== Testing Multi-User Voting System ===
+=== Deploying Complete Voting System ===
 
-📋 Account Information:
-Owner address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-User 1 address: 0x70997970C51812dc3A010C7d01b50e3d17dc9C8d
-User 2 address: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
-...
+1️⃣  Deploying VotingToken...
+✅ VotingToken deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+✅ Token name: Voting Token
+✅ Token symbol: VOTE
 
-🗳️  Testing Multi-User Voting:
-=====================================
+2️⃣  Deploying VotingContract...
+✅ VotingContract deployed to: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+✅ Owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 
-👤 User 1 (0x7099...C8d) voting for option 0 (Red)...
-   ✅ Vote cast successfully!
-   📊 Updated vote counts: [1, 0, 0]
-   📊 Total votes: 1
-
-👤 User 2 (0x3C44...3BC) voting for option 1 (Blue)...
-   ✅ Vote cast successfully!
-   📊 Updated vote counts: [1, 1, 0]
-   📊 Total votes: 2
-
-...
-
-🏆 Current winning option: Red (3 votes)
+🎉 Complete deployment successful!
 ```
 
-## Kết luận
+## 🎯 **Kết luận**
 Với các script này, bạn có thể dễ dàng test hệ thống voting với nhiều user khác nhau, mô phỏng môi trường thực tế với nhiều người tham gia bỏ phiếu.
+
+**Lưu ý quan trọng**: Luôn chạy `deploy-all.js` và `update-addresses.js` trước khi test các script khác!

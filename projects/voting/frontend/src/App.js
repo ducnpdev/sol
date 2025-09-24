@@ -4,9 +4,10 @@ import PollList from './components/PollList';
 import CreatePoll from './components/CreatePoll';
 import WalletConnect from './components/WalletConnect';
 import { VotingContractABI } from './contracts/VotingContractABI';
-import { testMetaMaskConnection, switchToHardhatNetwork } from './utils/networkTest';
+import { testMetaMaskConnection, switchToSepolia } from './utils/networkTest';
 
-const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS || '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
+const REQUIRED_CHAIN_ID = 11155111; // Sepolia
+const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 function App() {
   const [account, setAccount] = useState(null);
@@ -27,21 +28,36 @@ function App() {
     setContractLoading(true);
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const network = await provider.getNetwork();
+
+      if (network.chainId !== REQUIRED_CHAIN_ID) {
+        alert(`Wrong network detected (chainId: ${network.chainId}). Please switch to Sepolia (11155111).`);
+        setContractLoading(false);
+        return;
+      }
+
+      if (!ethers.utils.isAddress(CONTRACT_ADDRESS)) {
+        alert('Invalid contract address configured. Please set REACT_APP_CONTRACT_ADDRESS to a valid address.');
+        setContractLoading(false);
+        return;
+      }
+
+      const code = await provider.getCode(CONTRACT_ADDRESS);
+      if (!code || code === '0x') {
+        alert(`No contract code found at ${CONTRACT_ADDRESS} on Sepolia. Make sure you deployed to Sepolia and updated the address.`);
+        setContractLoading(false);
+        return;
+      }
+
       const signer = provider.getSigner();
       const votingContract = new ethers.Contract(CONTRACT_ADDRESS, VotingContractABI, signer);
       
       // Test the connection with timeout
       try {
-        const ownerPromise = votingContract.owner();
-        console.log("ownerPromise", ownerPromise);
-        console.log("votingContract", votingContract);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Connection timeout')), 5000)
-        );
-        await Promise.race([ownerPromise, timeoutPromise]);
+        await votingContract.owner();
       } catch (error) {
         console.error("Contract connection failed:", error);
-        alert("Failed to connect to contract. Please make sure you're connected to the Hardhat Local network (Chain ID: 1337)");
+        alert("Failed to connect to contract. Verify Sepolia network and contract address.");
         setContractLoading(false);
         return;
       }
@@ -99,8 +115,8 @@ function App() {
 
   const switchNetwork = async () => {
     try {
-      await switchToHardhatNetwork();
-      alert('Successfully switched to Hardhat Local network! Please refresh the page.');
+      await switchToSepolia();
+      alert('Successfully switched to Sepolia! Please refresh the page.');
       window.location.reload();
     } catch (error) {
       console.error('Network switch failed:', error);
@@ -175,7 +191,7 @@ function App() {
                 <p className={`text-sm font-medium ${
                   networkStatus.success ? 'text-green-800' : 'text-red-800'
                 }`}>
-                  {networkStatus.success ? 'Connected to Hardhat Local' : 'Network Error'}
+                  {networkStatus.success ? 'Connected to Sepolia' : 'Network Error'}
                 </p>
                 {!networkStatus.success && (
                   <p className="text-sm text-red-700 mt-1">

@@ -6,7 +6,7 @@ async function main() {
   try {
     // Get multiple signers (accounts)
     const [owner, user1, user2, user3] = await ethers.getSigners();
-    const contractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+    const contractAddress = "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44";
     
     const VotingContract = await ethers.getContractFactory("VotingContract");
     const votingContract = new ethers.Contract(contractAddress, VotingContract.interface, owner);
@@ -19,15 +19,52 @@ async function main() {
     
     // Get active polls
     console.log("\n🔍 Finding active polls...");
-    const activePolls = await votingContract.getActivePolls();
+    let activePolls = await votingContract.getActivePolls();
+    
+    let pollId;
     
     if (activePolls.length === 0) {
-      console.log("❌ No active polls found. Please create a poll first.");
-      return;
+      console.log("❌ No active polls found. Creating a new poll...");
+      
+      // Get current block timestamp
+      const currentBlock = await ethers.provider.getBlock("latest");
+      const currentTime = currentBlock.timestamp;
+      
+      // Create a new poll that starts in 1 minute
+      const pollTitle = "Quick Multi-User Test Poll";
+      const pollDescription = "This poll is created automatically for testing multi-user voting";
+      const startTime = currentTime + 60; // Start in 1 minute
+      const endTime = currentTime + 3600; // End in 1 hour
+      const options = ["Option A", "Option B", "Option C"];
+      
+      console.log("Creating poll:", pollTitle);
+      console.log("Options:", options.join(", "));
+      
+      try {
+        const tx = await votingContract.createPoll(
+          pollTitle,
+          pollDescription,
+          startTime,
+          endTime,
+          options
+        );
+        await tx.wait();
+        console.log("✅ Poll created successfully!");
+        
+        // Get the new poll ID
+        const pollCount = await votingContract.pollCount();
+        pollId = Number(pollCount);
+        console.log("New poll ID:", pollId);
+        
+      } catch (error) {
+        console.log("❌ Error creating poll:", error.message);
+        return;
+      }
+      
+    } else {
+      pollId = Number(activePolls[0]);
+      console.log(`✅ Found active poll ID: ${pollId}`);
     }
-    
-    const pollId = activePolls[0].toNumber();
-    console.log(`✅ Found active poll ID: ${pollId}`);
     
     // Get poll info
     const pollInfo = await votingContract.getPollInfo(pollId);

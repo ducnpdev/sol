@@ -6,7 +6,7 @@ async function main() {
   try {
     // Get multiple signers (accounts)
     const [owner, user1, user2, user3, user4, user5] = await ethers.getSigners();
-    const contractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+    const contractAddress = "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44";
     
     const VotingContract = await ethers.getContractFactory("VotingContract");
     const votingContract = new ethers.Contract(contractAddress, VotingContract.interface, owner);

@@ -21,11 +21,11 @@ async function main() {
     
     // Check owner's balance
     const ownerBalance = await votingToken.balanceOf(owner.address);
-    console.log(`Owner balance: ${ethers.utils.formatEther(ownerBalance)} ${tokenSymbol}`);
+    console.log(`Owner balance: ${ethers.formatEther(ownerBalance)} ${tokenSymbol}`);
     
     // Transfer tokens to user
-    const transferAmount = ethers.utils.parseEther("1000"); // Transfer 1000 tokens
-    console.log(`\nTransferring ${ethers.utils.formatEther(transferAmount)} ${tokenSymbol} to user...`);
+    const transferAmount = ethers.parseEther("1000"); // Transfer 1000 tokens
+    console.log(`\nTransferring ${ethers.formatEther(transferAmount)} ${tokenSymbol} to user...`);
     
     const tx = await votingToken.transfer(user.address, transferAmount);
     await tx.wait();
@@ -37,8 +37,8 @@ async function main() {
     const userBalance = await votingToken.balanceOf(user.address);
     
     console.log(`\nUpdated balances:`);
-    console.log(`Owner: ${ethers.utils.formatEther(newOwnerBalance)} ${tokenSymbol}`);
-    console.log(`User: ${ethers.utils.formatEther(userBalance)} ${tokenSymbol}`);
+    console.log(`Owner: ${ethers.formatEther(newOwnerBalance)} ${tokenSymbol}`);
+    console.log(`User: ${ethers.formatEther(userBalance)} ${tokenSymbol}`);
     
     console.log(`\n📝 To import this token in MetaMask:`);
     console.log(`1. Open MetaMask`);

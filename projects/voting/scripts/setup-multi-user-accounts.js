@@ -6,7 +6,7 @@ async function main() {
   try {
     // Get multiple signers (accounts)
     const [owner, user1, user2, user3, user4, user5] = await ethers.getSigners();
-    const tokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const tokenAddress = "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1";
     
     const VotingToken = await ethers.getContractFactory("VotingToken");
     const votingToken = new ethers.Contract(tokenAddress, VotingToken.interface, owner);
@@ -27,13 +27,13 @@ async function main() {
     
     // Check owner's balance
     const ownerBalance = await votingToken.balanceOf(owner.address);
-    console.log(`Owner balance: ${ethers.utils.formatEther(ownerBalance)} ${tokenSymbol}`);
+    console.log(`Owner balance: ${ethers.formatEther(ownerBalance)} ${tokenSymbol}`);
     
     // Setup multiple users with tokens
     const users = [user1, user2, user3, user4, user5];
-    const transferAmount = ethers.utils.parseEther("500"); // Transfer 500 tokens to each user
+    const transferAmount = ethers.parseEther("500"); // Transfer 500 tokens to each user
     
-    console.log(`\n💰 Transferring ${ethers.utils.formatEther(transferAmount)} ${tokenSymbol} to each user...`);
+    console.log(`\n💰 Transferring ${ethers.formatEther(transferAmount)} ${tokenSymbol} to each user...`);
     console.log("=====================================");
     
     for (let i = 0; i < users.length; i++) {
@@ -44,7 +44,7 @@ async function main() {
         
         // Check current balance
         const currentBalance = await votingToken.balanceOf(user.address);
-        console.log(`   Current balance: ${ethers.utils.formatEther(currentBalance)} ${tokenSymbol}`);
+        console.log(`   Current balance: ${ethers.formatEther(currentBalance)} ${tokenSymbol}`);
         
         if (currentBalance.gte(transferAmount)) {
           console.log(`   ✅ Already has sufficient balance`);
@@ -54,11 +54,11 @@ async function main() {
         // Transfer tokens
         const tx = await votingToken.transfer(user.address, transferAmount);
         await tx.wait();
-        console.log(`   ✅ Transferred ${ethers.utils.formatEther(transferAmount)} ${tokenSymbol}`);
+        console.log(`   ✅ Transferred ${ethers.formatEther(transferAmount)} ${tokenSymbol}`);
         
         // Check new balance
         const newBalance = await votingToken.balanceOf(user.address);
-        console.log(`   New balance: ${ethers.utils.formatEther(newBalance)} ${tokenSymbol}`);
+        console.log(`   New balance: ${ethers.formatEther(newBalance)} ${tokenSymbol}`);
         
       } catch (error) {
         console.log(`   ❌ Error: ${error.message}`);
@@ -68,12 +68,12 @@ async function main() {
     // Final balance summary
     console.log("\n📊 Final Balance Summary:");
     console.log("=========================");
-    console.log(`Owner: ${ethers.utils.formatEther(await votingToken.balanceOf(owner.address))} ${tokenSymbol}`);
+    console.log(`Owner: ${ethers.formatEther(await votingToken.balanceOf(owner.address))} ${tokenSymbol}`);
     
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
       const balance = await votingToken.balanceOf(user.address);
-      console.log(`User ${i + 1}: ${ethers.utils.formatEther(balance)} ${tokenSymbol}`);
+      console.log(`User ${i + 1}: ${ethers.formatEther(balance)} ${tokenSymbol}`);
     }
     
     console.log(`\n📝 To use these accounts in MetaMask:`);
