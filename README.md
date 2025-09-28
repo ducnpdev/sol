@@ -1,112 +1,94 @@
-# Solidity Development Project
+# Smart Contract Bridge
 
-This is a Solidity development project set up with Hardhat, a popular Ethereum development environment.
+A decentralized bridge system for BankVN token deposits and withdrawals using Solidity smart contracts.
 
 ## Prerequisites
 
 - Node.js (v16 or higher)
-- npm (comes with Node.js)
+- npm package manager
+- Ethereum wallet with Sepolia testnet ETH
 
 ## Project Structure
 
 ```
 godev-solidity/
-├── contracts/          # Solidity smart contracts
-│   └── Counter.sol     # Example counter contract
-├── scripts/            # Deployment and utility scripts
-│   └── deploy.js       # Contract deployment script
-├── test/               # Test files
-│   └── Counter.test.js # Tests for Counter contract
-├── hardhat.config.js   # Hardhat configuration
-├── package.json        # Project dependencies
-└── README.md          # This file
+├── contracts/
+│   ├── BankVNToken.sol              # ERC20 token contract
+│   ├── Bridge.sol                   # Bridge contract for deposits/withdrawals
+│   └── Counter.sol                  # Example contract
+├── scripts/
+│   ├── deploy-bankvntoken.js        # Deploy BankVN token
+│   ├── deploy-bridge.js             # Deploy bridge contract
+│   └── deploy.js                    # General deployment
+├── test/
+│   ├── BankVNBridge.test.js     # Bridge tests (25 test cases)
+│   └── Counter.test.js              # Example tests
+├── docs/
+│   └── deployment/
+│       └── DEVELOPMENT_GUIDE.md     # Complete setup & deployment guide
+├── hardhat.config.js                # Hardhat configuration
+└── package.json                     # Dependencies
 ```
 
-## Getting Started
+## Quick Start
 
-### 1. Install Dependencies
 ```bash
+# Install dependencies
 npm install
-```
 
-### 2. Compile Contracts
-```bash
+# Compile contracts
 npm run compile
-```
 
-### 3. Run Tests
-```bash
+# Run tests (25/25 passing)
 npm run test
 ```
 
-### 4. Start Local Blockchain
-```bash
-npm run node
-```
+## Complete Setup & Deployment
 
-### 5. Deploy Contracts
-In a new terminal, after starting the local blockchain:
-```bash
-npm run deploy:local
-```
+For detailed instructions including environment setup, contract deployment, testing, and verification:
+
+**📖 [Development Guide](docs/deployment/DEVELOPMENT_GUIDE.md)**
+
+The guide covers:
+
+- Environment configuration (.env setup)
+- Step-by-step contract deployment to Sepolia
+- Contract verification on Etherscan
+- Complete testing procedures
+- Troubleshooting common issues
+
+## Contracts
+
+### BankVNToken
+
+- ERC20 token with 1M initial supply
+- Mint/burn functionality
+- Deployed: `0x4D2c45779c89103c76Ae9cF5FE5596007a6cf815` (Sepolia)
+
+### Bridge
+
+- Secure token deposits with user ID tracking
+- Owner-only withdrawals
+- Gas optimized: ~63k gas (deposit), ~43k gas (withdraw)
 
 ## Available Scripts
 
-- `npm run compile` - Compile all Solidity contracts
-- `npm run test` - Run all tests
-- `npm run deploy` - Deploy contracts to default network
-- `npm run deploy:local` - Deploy contracts to local network
-- `npm run interact` - Interact with deployed contract (requires local network)
-- `npm run node` - Start local Hardhat network
-- `npm run clean` - Clean build artifacts
+```bash
+npm run compile              # Compile contracts
+npm run test                # Run all tests
+npm run node                # Start local network
 
-## Example Contract
+# Deployment (see Development Guide for setup)
+npx hardhat run scripts/deploy-bankvntoken.js --network sepolia
+npx hardhat run scripts/deploy-bridge.js --network sepolia
+```
 
-The project includes a simple `Counter` contract that demonstrates:
+## Testing
 
-- State variables
-- Functions (public, view)
-- Events
-- Error handling with `require`
-- Constructor
+- 25/25 test cases passing
+- Full coverage: deposits, withdrawals, security, gas optimization
+- Run with: `npm run test`
 
-### Counter Contract Functions
+## License
 
-- `increment()` - Increases the counter by 1
-- `decrement()` - Decreases the counter by 1 (reverts if below 0)
-- `getCount()` - Returns the current count
-- `reset()` - Resets the counter to 0
-
-## Development Workflow
-
-1. Write your Solidity contracts in the `contracts/` directory
-2. Write tests in the `test/` directory
-3. Run tests to ensure your contracts work correctly
-4. Deploy contracts using the scripts in `scripts/`
-5. Interact with deployed contracts
-
-## Hardhat Features
-
-This project includes the Hardhat Toolbox which provides:
-
-- **Ethers.js** - Ethereum library for interacting with contracts
-- **Chai** - Testing framework
-- **Gas Reporter** - Gas usage reporting
-- **TypeChain** - TypeScript bindings generation
-- **Solidity Coverage** - Code coverage for Solidity
-- **Hardhat Ignition** - Deployment management
-
-## Next Steps
-
-1. Explore the `Counter.sol` contract to understand Solidity syntax
-2. Modify the contract or create new ones
-3. Write comprehensive tests
-4. Learn about different networks and deployment strategies
-5. Explore advanced Hardhat features
-
-## Resources
-
-- [Solidity Documentation](https://docs.soliditylang.org/)
-- [Hardhat Documentation](https://hardhat.org/docs)
-- [Ethers.js Documentation](https://docs.ethers.org/)
-- [OpenZeppelin Contracts](https://openzeppelin.com/contracts/) - Popular smart contract library
+ISC
